@@ -16,6 +16,8 @@ function ajax_enqueue_scripts() {
 	//only load scripts for specified page
 	if(is_page())
 	{
+		wp_enqueue_style( 'infinte-style', plugins_url( '/infinite.css', __FILE__ ) );
+
 		wp_enqueue_script( 'infinite', plugins_url( '/infinite.js', __FILE__ ), array('jquery'), '1.0', true ); //load script, delcare jquery as a dependancy
 
 		//pass string ('postinfinite.ajax_url') to the script (can pass as many strings as you want).
@@ -26,14 +28,14 @@ function ajax_enqueue_scripts() {
 
 }
 
-//REMOVE THIS ONCE THE JQUERT ADDS THE CLASSES!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+//insert the loading gif into the_content()
 add_filter( 'the_content', 'post_love_display', 99 ); 
 function post_love_display( $content ) {
 	$loading = '';
-
-	//Insert the loading div into the content. (Will also mark the point to prepend new images)
-	$loading = '<div id="loading-ajax"><h1>MORE MORE MORE!!!</h1></div>';
+	$pluginUrl = plugins_url();
 	
+	//Insert the loading div into the content. (Will also mark the point to prepend new images)
+	$loading = '<div id="loading-ajax"></div><div class="loading-gif"><img class="hide" src="' . plugins_url() . '/infinite-gallery/spin.gif" alt="loading animation" /></div>';
 	
 
 	return $content . $loading;

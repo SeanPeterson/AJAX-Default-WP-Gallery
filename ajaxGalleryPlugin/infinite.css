@@ -1,0 +1,17 @@
+.loading-gif{
+	text-align: center;
+	width: 100%;
+}
+
+.loading-gif img{
+	margin: 0 auto;
+	text-align: center;
+}
+
+.hide{
+	display: none;
+}
+
+.show{
+	display: inline;
+}

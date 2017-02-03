@@ -3,6 +3,8 @@
 	Infinite Scroll Author: Bill Erickson
 */
 
+//add bottom of the page reference point for the infinite scroll
+
 
 var page = 2;
 var loading = false;
@@ -26,10 +28,14 @@ jQuery(window).scroll(function(){
 			//1. offset().top gives elemets distance from the top of the page
 			//2. scrollTop() = users scroll offset from the top of the page
 			// 1 - 2 --> Gives the user's current distance from the top of the page
-			var offset = jQuery('#loading-ajax').offset().top - jQuery(window).scrollTop();
+			var offset = jQuery('footer').offset().top - jQuery(window).scrollTop();
 
 			//if we're within 2000px of the element
 			if( 2000 > offset ) {
+
+				//show loading wheel
+				jQuery('.loading-gif img').addClass("show");
+
 				var post_id = jQuery(this).data('id'); //grab the id of the current post
 				endPoint += iteration;
 				startPoint += iteration;
@@ -43,6 +49,10 @@ jQuery(window).scroll(function(){
 						startPoint : startPoint
 					},
 					success : function( response ) {
+						//hide loading wheel
+						jQuery('.loading-gif img').removeClass("show");
+
+						//append new images to page
 						jQuery('#loading-ajax').append( response );
 						console.log("success");
 					}
