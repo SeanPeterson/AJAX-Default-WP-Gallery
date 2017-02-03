@@ -6,3 +6,4 @@ add the following div to the template page. When the user scrolls to this div on
 ```HTML
 <div class="post-listing"></div>
 ```
+-Enqueue JS files only for the template with the gallery on it  
