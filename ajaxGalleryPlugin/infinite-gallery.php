@@ -11,83 +11,53 @@
  */
 
 
-add_action( 'wp_enqueue_scripts', 'ajax_test_enqueue_scripts' );
-function ajax_test_enqueue_scripts() {
+add_action( 'wp_enqueue_scripts', 'ajax_enqueue_scripts' );
+function ajax_enqueue_scripts() {
+	//only load scripts for specified page
+	if(is_page())
+	{
+		wp_enqueue_script( 'infinite', plugins_url( '/infinite.js', __FILE__ ), array('jquery'), '1.0', true ); //load script, delcare jquery as a dependancy
 
-		wp_enqueue_style( 'love', plugins_url( '/love.css', __FILE__ ) );
-	
-
-	wp_enqueue_script( 'love', plugins_url( '/love.js', __FILE__ ), array('jquery'), '1.0', true ); //load script, delcare jquery as a dependancy
-
-	wp_localize_script( 'love', 'postlove', array( //pass string ('postlove.ajax_url') to the script (can pass as many strings as you want).
-		'ajax_url' => admin_url( 'admin-ajax.php' ) //postlove.ajax_url will output the url of the admin-ajax.php file
-	));
+		//pass string ('postinfinite.ajax_url') to the script (can pass as many strings as you want).
+		wp_localize_script( 'infinite', 'postinfinite', array( 
+			'ajax_url' => admin_url( 'admin-ajax.php' ) //postinfinite.ajax_url will output the url of the admin-ajax.php file
+		));
+	}
 
 }
 
-add_filter( 'the_content', 'post_love_display', 99 ); //tie into the_content() filter
+//REMOVE THIS ONCE THE JQUERT ADDS THE CLASSES!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+add_filter( 'the_content', 'post_love_display', 99 ); 
 function post_love_display( $content ) {
-	$love_text = '';
+	$loading = '';
 
-	
-		
-		$love = get_post_meta( get_the_ID(), 'post_love', true ); //get post_love object
-		$love = ( empty( $love ) ) ? 0 : $love; //if empty love = 0 else love = love
-
-		//href for the button should be the same as the target of our ajax call (for fallback purposes)
-		$love_text = '<p class="love-received"><button class="love-button" 
-		href="' . admin_url( 'admin-ajax.php?action=post_love_add_love&post_id=' . get_the_ID() ) . '"" 
-		data-id="' . get_the_ID() . '">give love</button><span id="love-count">' . $love . '</span></p>'; //add a button into the_content stream
+	//Insert the loading div into the content. (Will also mark the point to prepend new images)
+	$loading = '<div id="loading-ajax"><h1>MORE MORE MORE!!!</h1></div>';
 	
 	
 
-	return $content . $love_text;
+	return $content . $loading;
 
 }
-$GLOBAL_GALLERY = 2;
-add_action( 'wp_ajax_nopriv_post_love_add_love', 'post_love_add_love' ); //hook is executed for guest users
-add_action( 'wp_ajax_post_love_add_love', 'post_love_add_love' ); //hook is executed for logged in users
 
-//When the button is clicked the jquery posts it to the server. 
-//This server code increments the love value
-function post_love_add_love() {
+add_action( 'wp_ajax_nopriv_loadImages', 'loadImages' ); //hook is executed for guest users
+add_action( 'wp_ajax_post_loadImages', 'loadImages' ); //hook is executed for logged in users
 
-	/*
-	$love = get_post_meta( $_POST['post_id'], 'post_love', true ); //get love value for this post
-	$love++; //increment the value
-	if ( defined( 'DOING_AJAX' ) && DOING_AJAX ) { 
-		update_post_meta( $_POST['post_id'], 'post_love', $love ); //save the new love value
-		echo $love;
-		die(); //end
-	}
-	else{ //for people who weren't redirected by javascript
-		wp_redirect( get_permalink( $_REQUEST['post_id'] ) );
-		exit();
-	}
-	*/
+//Called by ajax
+function loadImages() {
 
-		$post->ID = $_REQUEST['post_id'];
-		$endPoint = $_REQUEST['endPoint'];
-		$startPoint = $_REQUEST['startPoint'];
-		echo "THE END POINT IS " . $endPoint . "END THIS";
-		echo "THE START POINT IS " . $startPoint . "START THIS";
-		$args = array(
-		'post_parent' => $post->ID,
-	
-		'numberposts' => -1,
-		'post_status' => 'published' 
-	);
-	$children = get_children( $args );
+	//get passed ajax vairables
+	$post->ID = $_REQUEST['post_id'];
+	$endPoint = $_REQUEST['endPoint'];
+	$startPoint = $_REQUEST['startPoint'];
 
-	$ids = get_gallery_attachments();
-
-	$value = current($ids);
-
+	//find the gallery shortcode img ids
 	$thisPost = get_post($post->ID);
 	$post_content = $thisPost->post_content;
 	preg_match('/\[gallery.*ids=.(.*).\]/', $post_content, $ids);
 	$images_id = explode(",", $ids[1]);
 
+	//FIX AND REMOVE THIS!!!!!!!!!!!!!!!!!!!!!!!!!
 	echo do_shortcode('[gallery end="' . $endPoint . '" start="' . $startPoint . '" ids="85,84,83,82,80,81,79,78,77,76,66,67,68,69,70,71,72,73,74,75,64,63,62,61,60,59,58,57,56,46,47,49,48,50,51,52,53,54,55,45,43,42,41,40,44,39,38,37,36,23,24,25,26,27,28,29,30,31,21,20,19,18,17,16,15,14,13,5,4,6,8,9,7,10,11,12"]');
 
 	foreach ($images_id as $id) {
@@ -96,18 +66,7 @@ function post_love_add_love() {
 	 }
 
 
-	 die(); //end
-}
-
-
-function get_gallery_attachments(){
-	global $post;
-	
-	$post_content = $post->post_content;
-	preg_match('/\[gallery.*ids=.(.*).\]/', $post_content, $ids);
-	$images_id = explode(",", $ids[1]);
-	
-	return $images_id;
+	 die();
 }
 
 add_filter( 'post_gallery', 'my_post_gallery', 10, 2 );
@@ -117,8 +76,6 @@ function my_post_gallery( $output, $attr) {
     static $instance = 0;
     $instance++;
 
-
-$GLOBAL_GALLERY++;
     // We're trusting author input, so let's at least make sure it looks like a valid orderby statement
     if ( isset( $attr['orderby'] ) ) {
         $attr['orderby'] = sanitize_sql_orderby( $attr['orderby'] );
