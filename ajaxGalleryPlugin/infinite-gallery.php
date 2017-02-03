@@ -13,6 +13,8 @@
 
 add_action( 'wp_enqueue_scripts', 'ajax_enqueue_scripts' );
 function ajax_enqueue_scripts() {
+	global $post;
+
 	//only load scripts for specified page
 	if(is_page())
 	{
@@ -21,16 +23,17 @@ function ajax_enqueue_scripts() {
 		wp_enqueue_script( 'infinite', plugins_url( '/infinite.js', __FILE__ ), array('jquery'), '1.0', true ); //load script, delcare jquery as a dependancy
 
 		//pass string ('postinfinite.ajax_url') to the script (can pass as many strings as you want).
-		wp_localize_script( 'infinite', 'postinfinite', array( 
-			'ajax_url' => admin_url( 'admin-ajax.php' ) //postinfinite.ajax_url will output the url of the admin-ajax.php file
+		wp_localize_script( 'infinite', 'postinfiniteArray', array( 
+			'ajax_url' => admin_url( 'admin-ajax.php' ), //postinfinite.ajax_url will output the url of the admin-ajax.php file
+			'postID' => $post->ID //pass post id
 		));
 	}
 
 }
 
 //insert the loading gif into the_content()
-add_filter( 'the_content', 'post_love_display', 99 ); 
-function post_love_display( $content ) {
+add_filter( 'the_content', 'post_content', 99 ); 
+function post_content( $content ) {
 	$loading = '';
 	$pluginUrl = plugins_url();
 	
@@ -48,25 +51,38 @@ add_action( 'wp_ajax_post_loadImages', 'loadImages' ); //hook is executed for lo
 //Called by ajax
 function loadImages() {
 
-	//get passed ajax vairables
-	$post->ID = $_REQUEST['post_id'];
-	$endPoint = $_REQUEST['endPoint'];
-	$startPoint = $_REQUEST['startPoint'];
+	$post->ID = $_POST['post_id'];
+	$endPoint = $_POST['endPoint'];
+	$startPoint = $_POST['startPoint'];
 
-	//find the gallery shortcode img ids
-	$thisPost = get_post($post->ID);
-	$post_content = $thisPost->post_content;
-	preg_match('/\[gallery.*ids=.(.*).\]/', $post_content, $ids);
-	$images_id = explode(",", $ids[1]);
+	$post = get_post($post->ID);
 
-	//FIX AND REMOVE THIS!!!!!!!!!!!!!!!!!!!!!!!!!
-	echo do_shortcode('[gallery end="' . $endPoint . '" start="' . $startPoint . '" ids="85,84,83,82,80,81,79,78,77,76,66,67,68,69,70,71,72,73,74,75,64,63,62,61,60,59,58,57,56,46,47,49,48,50,51,52,53,54,55,45,43,42,41,40,44,39,38,37,36,23,24,25,26,27,28,29,30,31,21,20,19,18,17,16,15,14,13,5,4,6,8,9,7,10,11,12"]');
+	if(has_shortcode( $post->post_content, 'gallery' ) )
+	{
+		$ids = get_post_gallery( $post->ID, false );
+		$galleryShortcode = '[gallery start="' . $startPoint . '" end="' . $endPoint . '" ids="';
+		$response = array();
+		
+		//Seperate string by comma
+		$idArray = explode(",", $ids['ids']);
+		$gallerySize = count($idArray); 
 
-	foreach ($images_id as $id) {
-  		//echo  wp_get_attachment_image($id);
-  		
-	 }
+		foreach($idArray as $id)
+		{
+			$galleryShortcode =  $galleryShortcode . $id . ",";
+		}	
 
+		$galleryShortcode = $galleryShortcode . '"]';
+
+		//generate the gallery
+		$shortcode = do_shortcode($galleryShortcode);
+
+		//associative array that's returned
+		$response['shortcode'] = $shortcode;
+		$response['gallerySize'] = $gallerySize;
+		
+		echo json_encode($response);
+	}
 
 	 die();
 }

@@ -3,9 +3,6 @@
 	Infinite Scroll Author: Bill Erickson
 */
 
-//add bottom of the page reference point for the infinite scroll
-
-
 var page = 2;
 var loading = false;
 var scrollHandling = {
@@ -36,15 +33,14 @@ jQuery(window).scroll(function(){
 				//show loading wheel
 				jQuery('.loading-gif img').addClass("show");
 
-				var post_id = jQuery(this).data('id'); //grab the id of the current post
 				endPoint += iteration;
 				startPoint += iteration;
 				jQuery.ajax({
-					url : postinfinite.ajax_url, //string that was passed
+					url : postinfiniteArray.ajax_url, //string that was passed
 					type : 'post', //get or post 
 					data : { //parameters that I want to send
 						action : 'loadImages', //wordpress requires an action
-						post_id : post_id, //info to pass to the php function
+						post_id : postinfiniteArray.postID, //info to pass to the php function
 						endPoint : endPoint,
 						startPoint : startPoint
 					},
@@ -53,8 +49,9 @@ jQuery(window).scroll(function(){
 						jQuery('.loading-gif img').removeClass("show");
 
 						//append new images to page
-						jQuery('#loading-ajax').append( response );
-						console.log("success");
+						var gallery = jQuery.parseJSON(response);
+
+						jQuery('#loading-ajax').append( gallery.shortcode );
 					}
 				});
 			}
