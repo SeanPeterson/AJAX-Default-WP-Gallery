@@ -64,25 +64,32 @@ function loadImages() {
 	if(has_shortcode( $post->post_content, 'gallery' ) )
 	{
 		$ids = get_post_gallery( $post->ID, false );
-		$galleryShortcode = '[gallery start="' . $startPoint . '" end="' . $endPoint . '" ids="';
 		$response = array();
 		
 		//Seperate string by comma
 		$idArray = explode(",", $ids['ids']);
 		$gallerySize = count($idArray); 
+        $urlArray = [];
 
+        $i = 0;
 		foreach($idArray as $id)
 		{
-			$galleryShortcode =  $galleryShortcode . $id . ",";
+
+            //ugly but I suck at PHP right now UPDATE!!!!!!!!!!!!!!!
+            if($i < $startPoint)
+            {
+                $i++;
+                continue;
+            }
+            if($i >= $endPoint)
+                break;
+
+            $urlArray[] = wp_get_attachment_url($id);
+            $i++;
 		}	
 
-		$galleryShortcode = $galleryShortcode . '"]';
-
-		//generate the gallery
-		$shortcode = do_shortcode($galleryShortcode);
-
 		//associative array that's returned
-		$response['shortcode'] = $shortcode;
+		$response['galleryArray'] = $urlArray;
 		$response['gallerySize'] = $gallerySize;
 		
 		echo json_encode($response);
@@ -117,7 +124,7 @@ function my_post_gallery( $output, $attr) {
         'include'    => '',
         'exclude'    => '',
         'start'		 => '0',
-        'end' => 9
+        'end' => 20
     ), $attr));
 
     $id = intval($id);
