@@ -15,18 +15,23 @@ function ajax_enqueue_scripts() {
 	global $post;
 
 	//only load scripts for specified page
-	if(is_page())
-	{
-		wp_enqueue_style( 'infinte-style', plugins_url( '/infinite.css', __FILE__ ) );
+	//if(is_page())
+	//{
+        wp_enqueue_script('masonry');
 
-		wp_enqueue_script( 'infinite', plugins_url( '/infinite.js', __FILE__ ), array('jquery'), '1.0', true ); //load script, delcare jquery as a dependancy
+        wp_register_script( 'imagesloaded', plugins_url( '/js/imagesloaded.pkgd.min.js', __FILE__ ));
+        wp_enqueue_script( 'imagesloaded' );
+
+		wp_enqueue_style( 'infinte-style', plugins_url( '/css/infinite.css', __FILE__ ) );
+
+		wp_enqueue_script( 'infinite', plugins_url( '/js/infinite.js', __FILE__ ), array('jquery'), '1.0', true ); //load script, delcare jquery as a dependancy
 
 		//pass string ('postinfinite.ajax_url') to the script (can pass as many strings as you want).
 		wp_localize_script( 'infinite', 'postinfiniteArray', array( 
 			'ajax_url' => admin_url( 'admin-ajax.php' ), //postinfinite.ajax_url will output the url of the admin-ajax.php file
 			'postID' => $post->ID //pass post id
 		));
-	}
+	//
 
 }
 
@@ -37,7 +42,7 @@ function post_content( $content ) {
 	$pluginUrl = plugins_url();
 	
 	//Insert the loading div into the content. (Will also mark the point to prepend new images)
-	$loading = '<div id="loading-ajax"></div><div class="loading-gif"><img class="hide" src="' . plugins_url() . '/infinite-gallery/spin.gif" alt="loading animation" /></div>';
+	$loading = '<div id="loading-ajax"></div><div class="loading-gif"><img class="hide" src="' . plugins_url('/ajaxGalleryPlugin/images/spin.gif" alt="loading animation" /></div>');
 	
 
 	return $content . $loading;
@@ -101,14 +106,14 @@ function my_post_gallery( $output, $attr) {
     }
 
     extract(shortcode_atts(array(
-        'order'      => 'ASC',
+        'order'      => 'rand',
         'orderby'    => 'menu_order ID',
         'id'         => $post->ID,
         'itemtag'    => 'dl',
         'icontag'    => 'dt',
         'captiontag' => 'dd',
         'columns'    => 3,
-        'size'       => 'thumbnail',
+        'size'       => 'full',
         'include'    => '',
         'exclude'    => '',
         'start'		 => '0',
