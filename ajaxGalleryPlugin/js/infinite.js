@@ -47,11 +47,7 @@ jQuery(window).scroll(function(){
 					},
 					success : function( response ) {
 						var gallery = jQuery.parseJSON(response);
-						var $returned;
-						//hide loading wheel
-						jQuery('.loading-gif img').addClass("hide");
-
-						
+						var $returned;		
 
 						//set size of gallery so we know when to stop executing ajax script
 						gallerySize = gallery.gallerySize;
@@ -91,6 +87,8 @@ jQuery(window).scroll(function(){
 								}
 							}
 						}
+						//hide loading wheel
+						jQuery('.loading-gif img').addClass("hide");
 					}
 				});
 			}
@@ -103,17 +101,76 @@ jQuery(window).scroll(function(){
 /*GALLERY MASONRY*/
 
 jQuery(document).ready(function() {
-	 // Init Masonry
-    var opts = {
-        itemSelector: '.gallery-item',
-        gutter: 5,
-        transitionDuration: 0 //does not play well with mobile
-    }
-    $grid = jQuery('.gallery').masonry(opts);  
+
+	var isLarge = true;
+
+	//init masonry
 	if (jQuery(window).width() > 925) {
+		 // Init Masonry
+	    var opts = {
+	        itemSelector: '.gallery-item',
+	        gutter: 5,
+	        //transitionDuration: 0 //does not play well with mobile
+	    }
+	    $grid = jQuery('.gallery').masonry(opts);  
+		console.log("LARGE");
 		// layout Masonry after each image loads
 		$grid.imagesLoaded().progress( function() {
 		  $grid.masonry('layout');
 		});
 	}
+	else
+	{
+		 // Init Masonry
+		 isLarge = false;
+	    var opts = {
+	        itemSelector: '.gallery-item',
+	        gutter: 5,
+	        transitionDuration: 0 //does not play well with mobile
+	    }
+	    $grid = jQuery('.gallery').masonry(opts);  
+		console.log("SMALL");
+		// layout Masonry after each image loads
+		$grid.imagesLoaded().progress( function() {
+		  $grid.masonry('layout');
+		});
+	}
+
+	//enable/disable animations on screen resize
+	jQuery(window).resize(function(){
+	    if ((jQuery(window).width() > 925) && (!isLarge)){
+	    	isLarge = true;
+		 // Re-Init Masonry
+	    var opts = {
+	        itemSelector: '.gallery-item',
+	        gutter: 5,
+	        //transitionDuration: 0 //does not play well with mobile
+	    }
+	    $grid = jQuery('.gallery').masonry(opts);  
+		console.log("LARGE");
+		// layout Masonry after each image loads
+		$grid.imagesLoaded().progress( function() {
+		  $grid.masonry('layout');
+		});
+	}
+	else if((jQuery(window).width() < 925) && (isLarge))
+	{
+		 //Re-Init Masonry
+		 isLarge = false;
+	    var opts = {
+	        itemSelector: '.gallery-item',
+	        gutter: 5,
+	        transitionDuration: 0 //does not play well with mobile
+	    }
+	    $grid = jQuery('.gallery').masonry(opts);  
+		console.log("SMALL");
+		// layout Masonry after each image loads
+		$grid.imagesLoaded().progress( function() {
+		  $grid.masonry('layout');
+		});
+	}
+	});
+
+
 });	
+
