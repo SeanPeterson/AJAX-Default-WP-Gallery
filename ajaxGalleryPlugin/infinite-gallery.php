@@ -15,8 +15,8 @@ function ajax_enqueue_scripts() {
 	global $post;
 
 	//only load scripts for specified page
-	//if(is_page())
-	//{
+	if(is_page('photo-gallery'))
+    {
         wp_enqueue_script('masonry');
 
         wp_register_script( 'imagesloaded', plugins_url( '/js/imagesloaded.pkgd.min.js', __FILE__ ));
@@ -31,21 +31,26 @@ function ajax_enqueue_scripts() {
 			'ajax_url' => admin_url( 'admin-ajax.php' ), //postinfinite.ajax_url will output the url of the admin-ajax.php file
 			'postID' => $post->ID //pass post id
 		));
-	//
+	}
 
 }
 
 //insert the loading gif into the_content()
 add_filter( 'the_content', 'post_content', 99 ); 
 function post_content( $content ) {
-	$loading = '';
-	$pluginUrl = plugins_url();
-	
-	//Insert the loading div into the content. (Will also mark the point to prepend new images)
-	$loading = '<div id="loading-ajax"></div><div class="loading-gif"><img class="hide" src="' . plugins_url('/ajaxGalleryPlugin/images/spin.gif" alt="loading animation" /></div>');
-	
+        
+    if(is_page('photo-gallery')){
+    	$loading = '';
+    	$pluginUrl = plugins_url();
+    	
+    	//Insert the loading div into the content. (Will also mark the point to prepend new images)
+    	$loading = '<div id="loading-ajax"></div><div class="loading-gif"><img class="hide" src="' . plugins_url('/ajaxGalleryPlugin/images/spin.gif" alt="loading animation" /></div>');
+    	
 
-	return $content . $loading;
+    	return $content . $loading;
+    }
+    else
+        return $content;
 
 }
 
