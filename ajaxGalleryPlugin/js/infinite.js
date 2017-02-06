@@ -3,7 +3,7 @@
 	Infinite Scroll Author: Bill Erickson
 */
 
-var $grid;
+var $grid = null;
 var page = 2;
 var loading = false;
 var scrollHandling = {
@@ -46,13 +46,12 @@ jQuery(window).scroll(function(){
 						startPoint : startPoint
 					},
 					success : function( response ) {
+						var gallery = jQuery.parseJSON(response);
 						var $returned;
-
 						//hide loading wheel
 						jQuery('.loading-gif img').addClass("hide");
 
-						//append new images to page
-						var gallery = jQuery.parseJSON(response);
+						
 
 						//set size of gallery so we know when to stop executing ajax script
 						gallerySize = gallery.gallerySize;
@@ -60,16 +59,37 @@ jQuery(window).scroll(function(){
 						//append new items
 						for(var i=0; i<gallery.galleryArray.length; i++)
 						{
-							$returned = jQuery('<dl class="gallery-item"><a href="' + gallery.galleryArray[i] + '"> <img src="' + gallery.galleryArray[i] + '" /></a><dd class="gallery-caption">' + gallery.captionArray[i] + '</dd></dl>');
+							if (jQuery(window).width() > 925) {
+								$returned = jQuery('<dl class="gallery-item"><a href="' + gallery.galleryArray[i] + '"> <img src="' + gallery.galleryArray[i] + '" /></a><dd class="gallery-caption">' + gallery.captionArray[i] + '</dd></dl>');
 
-							 // append items to grid
-							$grid.append( $returned );
-							// add and lay out newly appended items
-							$grid.masonry( 'appended', $returned );
-							// layout Masonry after each image loads
-							$grid.imagesLoaded().progress( function() {
-							  $grid.masonry('layout');
-							});
+								 // append items to grid
+								$grid.append( $returned );
+								// add and lay out newly appended items
+								$grid.masonry( 'appended', $returned );
+								// layout Masonry after each image loads
+								$grid.imagesLoaded().progress( function() {
+								  $grid.masonry('layout');
+								});
+							}
+							else{ //manually append items for mobile view (masonry not used)
+								for(var i=0; i<gallery.galleryArray.length; i++){
+									if($grid != null) //the browser window is being resized (not a mobile device)
+									{
+										$returned = jQuery('<dl class="gallery-item"><a href="' + gallery.galleryArray[i] + '"> <img src="' + gallery.galleryArray[i] + '" /></a><dd class="gallery-caption">' + gallery.captionArray[i] + '</dd></dl>');
+
+										 // append items to grid
+										$grid.append( $returned );
+										// add and lay out newly appended items
+										$grid.masonry( 'appended', $returned );
+										// layout Masonry after each image loads
+										$grid.imagesLoaded().progress( function() {
+										  $grid.masonry('layout');
+										});
+									}
+									else
+										jQuery('#gallery-1').append('<dl class="gallery-item"><a href="' + gallery.galleryArray[i] + '"> <img src="' + gallery.galleryArray[i] + '" /></a><dd class="gallery-caption">' + gallery.captionArray[i] + '</dd></dl>');
+								}
+							}
 						}
 					}
 				});
@@ -83,18 +103,17 @@ jQuery(window).scroll(function(){
 /*GALLERY MASONRY*/
 
 jQuery(document).ready(function() {
-	//init masonry
-	$grid = jQuery('.gallery').masonry({
-		//isOriginTop: false,
-		//columnWidth: 320,
-		gutter: 5,
-		itemSelector: '.gallery-item'
-		}).imagesLoaded(function() {
-	});
-
+	 // Init Masonry
+    var opts = {
+        itemSelector: '.gallery-item',
+        gutter: 5,
+        transitionDuration: 0 //does not play well with mobile
+    }
+    $grid = jQuery('.gallery').masonry(opts);  
+	if (jQuery(window).width() > 925) {
 		// layout Masonry after each image loads
 		$grid.imagesLoaded().progress( function() {
 		  $grid.masonry('layout');
 		});
-
+	}
 });	
