@@ -70,7 +70,7 @@ function loadImages() {
 		$idArray = explode(",", $ids['ids']);
 		$gallerySize = count($idArray); 
         $urlArray = [];
-
+        $captionArray = [];
         $i = 0;
 		foreach($idArray as $id)
 		{
@@ -85,13 +85,15 @@ function loadImages() {
                 break;
 
             $urlArray[] = wp_get_attachment_url($id);
+            $captionArray[] = get_post($id)->post_excerpt;
             $i++;
 		}	
 
 		//associative array that's returned
 		$response['galleryArray'] = $urlArray;
+        $response['captionArray'] = $captionArray;
 		$response['gallerySize'] = $gallerySize;
-		
+
 		echo json_encode($response);
 	}
 
@@ -113,7 +115,7 @@ function my_post_gallery( $output, $attr) {
     }
 
     extract(shortcode_atts(array(
-        'order'      => 'rand',
+        'order'      => 'asc',
         'orderby'    => 'menu_order ID',
         'id'         => $post->ID,
         'itemtag'    => 'dl',

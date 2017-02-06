@@ -28,9 +28,6 @@ jQuery(window).scroll(function(){
 			// 1 - 2 --> Gives the user's current distance from the top of the page
 			var offset = jQuery('#footer').offset().top - jQuery(window).scrollTop();
 
-			if(endPoint >= gallerySize)
-				jQuery("#loadingAjax").append("<h1>No more Images</h1>");
-
 			//if we're within 2000px of the element
 			if( 2000 > offset  && endPoint < gallerySize) {
 
@@ -63,7 +60,7 @@ jQuery(window).scroll(function(){
 						//append new items
 						for(var i=0; i<gallery.galleryArray.length; i++)
 						{
-							$returned = jQuery('<dl class="gallery-item"><img src="' + gallery.galleryArray[i] + '" /></dl>');
+							$returned = jQuery('<dl class="gallery-item"><a href="' + gallery.galleryArray[i] + '"> <img src="' + gallery.galleryArray[i] + '" /></a><dd class="gallery-caption">' + gallery.captionArray[i] + '</dd></dl>');
 
 							 // append items to grid
 							$grid.append( $returned );
