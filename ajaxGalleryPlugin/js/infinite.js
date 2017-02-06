@@ -19,8 +19,9 @@ var startPoint = 0, endPoint = iteration;
 var gallerySize = 999999999; //unlikly large number
 
 jQuery(window).scroll(function(){
+
 		if( ! loading && scrollHandling.allow ) {
-			//scrollHandling.allow = false; //disable event
+			// scrollHandling.allow = false; //disable event
 			//setTimeout(scrollHandling.reallow, scrollHandling.delay);
 
 			//1. offset().top gives elemets distance from the top of the page
@@ -33,6 +34,7 @@ jQuery(window).scroll(function(){
 
 				//show loading wheel
 				jQuery('.loading-gif img').removeClass("hide");
+				loading = true;
 
 				endPoint += iteration;
 				startPoint += iteration;
@@ -87,8 +89,15 @@ jQuery(window).scroll(function(){
 								}
 							}
 						}
-						//hide loading wheel
-						jQuery('.loading-gif img').addClass("hide");
+
+						//Layout complete
+						$grid.one( 'layoutComplete',
+						  function( event, laidOutItems ) {
+						    //hide loading wheel
+							jQuery('.loading-gif img').addClass("hide");
+							loading = false;
+						  }
+						);
 					}
 				});
 			}
@@ -113,7 +122,6 @@ jQuery(document).ready(function() {
 	        //transitionDuration: 0 //does not play well with mobile
 	    }
 	    $grid = jQuery('.gallery').masonry(opts);  
-		console.log("LARGE");
 		// layout Masonry after each image loads
 		$grid.imagesLoaded().progress( function() {
 		  $grid.masonry('layout');
@@ -129,7 +137,6 @@ jQuery(document).ready(function() {
 	        transitionDuration: 0 //does not play well with mobile
 	    }
 	    $grid = jQuery('.gallery').masonry(opts);  
-		console.log("SMALL");
 		// layout Masonry after each image loads
 		$grid.imagesLoaded().progress( function() {
 		  $grid.masonry('layout');
@@ -147,7 +154,6 @@ jQuery(document).ready(function() {
 	        //transitionDuration: 0 //does not play well with mobile
 	    }
 	    $grid = jQuery('.gallery').masonry(opts);  
-		console.log("LARGE");
 		// layout Masonry after each image loads
 		$grid.imagesLoaded().progress( function() {
 		  $grid.masonry('layout');
@@ -163,14 +169,11 @@ jQuery(document).ready(function() {
 	        transitionDuration: 0 //does not play well with mobile
 	    }
 	    $grid = jQuery('.gallery').masonry(opts);  
-		console.log("SMALL");
 		// layout Masonry after each image loads
 		$grid.imagesLoaded().progress( function() {
 		  $grid.masonry('layout');
 		});
 	}
 	});
-
-
 });	
 
