@@ -2,7 +2,9 @@
 add ajax + infinite scroll functionality to the default WP Gallery
 
 #ToDo
-loadImages function needs to load the other keys into the gallery shortcode (size, orderby, etc)
+loadImages function needs to load the other keys into the gallery shortcode (size, orderby, etc)   
+remove multiple ajax calls   
+add scroll to top button
 
 #Assumptions
 Plugin uses the footer element to determine the bottom of the page. Therefore page must contain a footer at the bottom of the page for this plugin to function.
