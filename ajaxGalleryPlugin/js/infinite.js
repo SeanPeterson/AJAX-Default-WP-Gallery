@@ -57,7 +57,7 @@ jQuery(window).scroll(function(){
 						//append new items
 						for(var i=0; i<gallery.galleryArray.length; i++)
 						{
-							if (jQuery(window).width() > 925) {
+							if (jQuery(window).width() > 925 || $grid != null) {
 								$returned = jQuery('<dl class="gallery-item"><a href="' + gallery.galleryArray[i] + '"> <img src="' + gallery.galleryArray[i] + '" /></a><dd class="gallery-caption">' + gallery.captionArray[i] + '</dd></dl>');
 
 								 // append items to grid
@@ -69,25 +69,8 @@ jQuery(window).scroll(function(){
 								  $grid.masonry('layout');
 								});
 							}
-							else{ //manually append items for mobile view (masonry not used)
-								for(var i=0; i<gallery.galleryArray.length; i++){
-									if($grid != null) //the browser window is being resized (not a mobile device)
-									{
-										$returned = jQuery('<dl class="gallery-item"><a href="' + gallery.galleryArray[i] + '"> <img src="' + gallery.galleryArray[i] + '" /></a><dd class="gallery-caption">' + gallery.captionArray[i] + '</dd></dl>');
-
-										 // append items to grid
-										$grid.append( $returned );
-										// add and lay out newly appended items
-										$grid.masonry( 'appended', $returned );
-										// layout Masonry after each image loads
-										$grid.imagesLoaded().progress( function() {
-										  $grid.masonry('layout');
-										});
-									}
-									else
-										jQuery('#gallery-1').append('<dl class="gallery-item"><a href="' + gallery.galleryArray[i] + '"> <img src="' + gallery.galleryArray[i] + '" /></a><dd class="gallery-caption">' + gallery.captionArray[i] + '</dd></dl>');
-								}
-							}
+						
+							
 						}
 
 						//Layout complete
@@ -109,71 +92,48 @@ jQuery(window).scroll(function(){
 
 /*GALLERY MASONRY*/
 
+//Init or re-init the masonty gallery.
+//For mobile transitions are disabled
+function initMasonryGallery(durationTime)
+{
+	var opts = {
+	        itemSelector: '.gallery-item',
+	        gutter: 5,
+	        transitionDuration: durationTime
+	    }
+	    $grid = jQuery('.gallery').masonry(opts);  
+		// layout Masonry after each image loads
+		$grid.imagesLoaded().progress( function() {
+		  $grid.masonry('layout');
+		});	
+}
+
+
 jQuery(document).ready(function() {
 
 	var isLarge = true;
 
 	//init masonry
 	if (jQuery(window).width() > 925) {
-		 // Init Masonry
-	    var opts = {
-	        itemSelector: '.gallery-item',
-	        gutter: 5,
-	        //transitionDuration: 0 //does not play well with mobile
-	    }
-	    $grid = jQuery('.gallery').masonry(opts);  
-		// layout Masonry after each image loads
-		$grid.imagesLoaded().progress( function() {
-		  $grid.masonry('layout');
-		});
+		initMasonryGallery('0.4s');	
 	}
 	else
 	{
-		 // Init Masonry
 		 isLarge = false;
-	    var opts = {
-	        itemSelector: '.gallery-item',
-	        gutter: 5,
-	        transitionDuration: 0 //does not play well with mobile
-	    }
-	    $grid = jQuery('.gallery').masonry(opts);  
-		// layout Masonry after each image loads
-		$grid.imagesLoaded().progress( function() {
-		  $grid.masonry('layout');
-		});
+		 initMasonryGallery(0);	    
 	}
 
 	//enable/disable animations on screen resize
 	jQuery(window).resize(function(){
-	    if ((jQuery(window).width() > 925) && (!isLarge)){
+	    if ((jQuery(window).width() > 925) && (!isLarge)){ //already large, no need to re-init
 	    	isLarge = true;
-		 // Re-Init Masonry
-	    var opts = {
-	        itemSelector: '.gallery-item',
-	        gutter: 5,
-	        //transitionDuration: 0 //does not play well with mobile
-	    }
-	    $grid = jQuery('.gallery').masonry(opts);  
-		// layout Masonry after each image loads
-		$grid.imagesLoaded().progress( function() {
-		  $grid.masonry('layout');
-		});
-	}
-	else if((jQuery(window).width() < 925) && (isLarge))
-	{
-		 //Re-Init Masonry
-		 isLarge = false;
-	    var opts = {
-	        itemSelector: '.gallery-item',
-	        gutter: 5,
-	        transitionDuration: 0 //does not play well with mobile
-	    }
-	    $grid = jQuery('.gallery').masonry(opts);  
-		// layout Masonry after each image loads
-		$grid.imagesLoaded().progress( function() {
-		  $grid.masonry('layout');
-		});
-	}
+			initMasonryGallery('0.4s');	 	
+		}
+		else if((jQuery(window).width() < 925) && (isLarge))
+		{
+			 isLarge = false;
+			 initMasonryGallery(0);	
+		}
 	});
 });	
 
