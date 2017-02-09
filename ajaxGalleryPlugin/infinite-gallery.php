@@ -41,7 +41,6 @@ function post_content( $content ) {
         
     if(is_page('photo-gallery')){
     	$loading = '';
-    	$pluginUrl = plugins_url();
     	
     	//Insert the loading div into the content. (Will also mark the point to prepend new images)
     	$loading = '<div id="loading-ajax"></div><div class="loading-gif"><img class="hide" src="' . plugins_url('/ajaxGalleryPlugin/images/spin.gif" alt="loading animation" /></div>');
@@ -61,8 +60,6 @@ add_action( 'wp_ajax_post_loadImages', 'loadImages' ); //hook is executed for lo
 function loadImages() {
 
 	$post->ID = $_POST['post_id'];
-	$endPoint = $_POST['endPoint'];
-	$startPoint = $_POST['startPoint'];
 
 	$post = get_post($post->ID);
 
@@ -79,16 +76,6 @@ function loadImages() {
         $i = 0;
 		foreach($idArray as $id)
 		{
-
-            //ugly but I suck at PHP right now UPDATE!!!!!!!!!!!!!!!
-            if($i < $startPoint)
-            {
-                $i++;
-                continue;
-            }
-            if($i >= $endPoint)
-                break;
-
             $urlArray[] = wp_get_attachment_url($id);
             $captionArray[] = get_post($id)->post_excerpt;
             $i++;
@@ -130,7 +117,7 @@ function my_post_gallery( $output, $attr) {
         'size'       => 'full',
         'include'    => '',
         'exclude'    => '',
-        'start'		 => '0',
+        'start'      => '0',
         'end' => 20
     ), $attr));
 
@@ -197,14 +184,14 @@ function my_post_gallery( $output, $attr) {
 
     foreach ( $attachments as $id => $attachment ) {
 
-    	//ugly but I suck at PHP right now UPDATE!!!!!!!!!!!!!!!
-    	if($i < $start)
-    	{
-    		$i++;
-    		continue;
-    	}
-    	if($i >= $end)
-    		break;
+        //ugly but I suck at PHP right now UPDATE!!!!!!!!!!!!!!!
+        if($i < $start)
+        {
+            $i++;
+            continue;
+        }
+        if($i >= $end)
+            break;
 
         $link = isset($attr['link']) && 'file' == $attr['link'] ? wp_get_attachment_link($id, $size, false, false) : wp_get_attachment_link($id, $size, true, false);
 
