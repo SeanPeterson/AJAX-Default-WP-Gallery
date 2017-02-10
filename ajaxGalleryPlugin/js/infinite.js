@@ -13,6 +13,7 @@ var Gallery = (function(){
 	var loading = false;
 	var start = 20;
 	var end = start + ITERATION;
+	var i = start;
 
 	return{
 		setJson: function(response){
@@ -39,16 +40,17 @@ var Gallery = (function(){
 				return false;
 		},
 		appendItems: function(){
-			console.log("FUNCTION");
-			//ensure that page json data exists
-			if(galleryJson === null)
-				return;
+	
+			//stager the appending of images so as not to freeze the browser
+			setTimeout(function () {
 
-			for(var i=start; i<end; i++)
-			{
 				//ensure that loop stays within array
 				if(i >= galleryJson.gallerySize)
-					break;
+				{
+					//hide loading wheel
+					jQuery('.loading-gif img').addClass("hide");
+					return;
+				}
 
 				//append the items
 				var $element = jQuery('<dl class="gallery-item"><a href="' + galleryJson.galleryArray[i] + '"> <img src="' + galleryJson.galleryArray[i] + '" /></a><dd class="gallery-caption">' + galleryJson.captionArray[i] + '</dd></dl>');
@@ -61,20 +63,22 @@ var Gallery = (function(){
 				$grid.imagesLoaded().progress( function() {
 				  $grid.masonry('layout');
 				});
-			}
 
-			//update positions
-			start += ITERATION;
-			end += ITERATION;
-
-			//Layout complete
-			$grid.one( 'layoutComplete',
-			  function( event, laidOutItems ) {
-			    //hide loading wheel
-				jQuery('.loading-gif img').addClass("hide");
-				loading = false;
-			  }
-			);
+				if(i < end) {
+			        Gallery.appendItems();
+			    }
+			    else
+			    {
+			    	//update positions
+					start += ITERATION;
+					end += ITERATION;
+					i = start;
+					//hide loading wheel
+					jQuery('.loading-gif img').addClass("hide");
+					loading = false;
+			    }
+				i++;
+			}, 0);
 		}
 	}
 })();
@@ -90,7 +94,6 @@ function initGallery(){
 		},
 		success : function( response ) {
 			 Gallery.setJson(response);
-			 console.log("SET IT");
 		}
 	});
 }
@@ -118,9 +121,9 @@ jQuery(window).ready(function() {
 			//2. scrollTop() = users scroll offset from the top of the page
 			// 1 - 2 --> Gives the user's current distance from the top of the page
 			var offset = jQuery('#footer').offset().top - jQuery(window).scrollTop();
-			console.log("OFFSET IS " + offset);
+
 			//if we're within 2000px of the element
-			if( 1000 > offset) {
+			if( 2000 > offset) {
 
 				Gallery.setLoading(true);
 				//show loading wheel

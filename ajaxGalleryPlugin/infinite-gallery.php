@@ -12,26 +12,26 @@
 
 add_action( 'wp_enqueue_scripts', 'ajax_enqueue_scripts' );
 function ajax_enqueue_scripts() {
-	global $post;
+    global $post;
 
-	//only load scripts for specified page
-	if(is_page('photo-gallery'))
+    //only load scripts for specified page
+    if(is_page('photo-gallery'))
     {
         wp_enqueue_script('masonry');
 
         wp_register_script( 'imagesloaded', plugins_url( '/js/imagesloaded.pkgd.min.js', __FILE__ ));
         wp_enqueue_script( 'imagesloaded' );
 
-		wp_enqueue_style( 'infinte-style', plugins_url( '/css/infinite.css', __FILE__ ) );
+        wp_enqueue_style( 'infinte-style', plugins_url( '/css/infinite.css', __FILE__ ) );
 
-		wp_enqueue_script( 'infinite', plugins_url( '/js/infinite.js', __FILE__ ), array('jquery'), '1.0', true ); //load script, delcare jquery as a dependancy
+        wp_enqueue_script( 'infinite', plugins_url( '/js/infinite.js?ver=1.0', __FILE__ ), array('jquery'), '1.0', true ); //load script, delcare jquery as a dependancy
 
-		//pass string ('postinfinite.ajax_url') to the script (can pass as many strings as you want).
-		wp_localize_script( 'infinite', 'postinfiniteArray', array( 
-			'ajax_url' => admin_url( 'admin-ajax.php' ), //postinfinite.ajax_url will output the url of the admin-ajax.php file
-			'postID' => $post->ID //pass post id
-		));
-	}
+        //pass string ('postinfinite.ajax_url') to the script (can pass as many strings as you want).
+        wp_localize_script( 'infinite', 'postinfiniteArray', array( 
+            'ajax_url' => admin_url( 'admin-ajax.php' ), //postinfinite.ajax_url will output the url of the admin-ajax.php file
+            'postID' => $post->ID //pass post id
+        ));
+    }
 
 }
 
@@ -40,13 +40,13 @@ add_filter( 'the_content', 'post_content', 99 );
 function post_content( $content ) {
         
     if(is_page('photo-gallery')){
-    	$loading = '';
-    	
-    	//Insert the loading div into the content. (Will also mark the point to prepend new images)
-    	$loading = '<div id="loading-ajax"></div><div class="loading-gif"><img class="hide" src="' . plugins_url('/ajaxGalleryPlugin/images/spin.gif" alt="loading animation" /></div>');
-    	
+        $loading = '';
+        
+        //Insert the loading div into the content. (Will also mark the point to prepend new images)
+        $loading = '<div id="loading-ajax"></div><div class="loading-gif"><img class="hide" src="' . plugins_url('/ajaxGalleryPlugin/images/spin.gif" alt="loading animation" /></div>');
+        
 
-    	return $content . $loading;
+        return $content . $loading;
     }
     else
         return $content;
@@ -59,37 +59,37 @@ add_action( 'wp_ajax_post_loadImages', 'loadImages' ); //hook is executed for lo
 //Called by ajax
 function loadImages() {
 
-	$post->ID = $_POST['post_id'];
+    $post->ID = $_POST['post_id'];
 
-	$post = get_post($post->ID);
+    $post = get_post($post->ID);
 
-	if(has_shortcode( $post->post_content, 'gallery' ) )
-	{
-		$ids = get_post_gallery( $post->ID, false );
-		$response = array();
-		
-		//Seperate string by comma
-		$idArray = explode(",", $ids['ids']);
-		$gallerySize = count($idArray); 
+    if(has_shortcode( $post->post_content, 'gallery' ) )
+    {
+        $ids = get_post_gallery( $post->ID, false );
+        $response = array();
+        
+        //Seperate string by comma
+        $idArray = explode(",", $ids['ids']);
+        $gallerySize = count($idArray); 
         $urlArray = [];
         $captionArray = [];
         $i = 0;
-		foreach($idArray as $id)
-		{
+        foreach($idArray as $id)
+        {
             $urlArray[] = wp_get_attachment_url($id);
             $captionArray[] = get_post($id)->post_excerpt;
             $i++;
-		}	
+        }   
 
-		//associative array that's returned
-		$response['galleryArray'] = $urlArray;
+        //associative array that's returned
+        $response['galleryArray'] = $urlArray;
         $response['captionArray'] = $captionArray;
-		$response['gallerySize'] = $gallerySize;
+        $response['gallerySize'] = $gallerySize;
 
-		echo json_encode($response);
-	}
+        echo json_encode($response);
+    }
 
-	 die();
+     die();
 }
 
 add_filter( 'post_gallery', 'my_post_gallery', 10, 2 );
@@ -221,4 +221,3 @@ function my_post_gallery( $output, $attr) {
 
     return $output;
 }
-
